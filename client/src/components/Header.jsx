@@ -16,7 +16,7 @@ export default function Header() {
           Bear&apos;s
         </span>
         Blog
-        <img src={logo} alt="logo" className="w-8 h-8" />
+        <img src={logo} alt="logo" className="w-6 h-6 sm:w-8 sm:h-8" />
       </Link>
       <form>
         <TextInput
