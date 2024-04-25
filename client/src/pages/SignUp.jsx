@@ -67,7 +67,7 @@ export default function SignUp() {
           </Link>
           <p className="text-sm mt-5">
             This is a demo project. If you want to use it, please sign up. You
-            can sign up with email and password or with Google.
+            can sign up with your email and password or with Google.
           </p>
         </div>
         {/* right */}
@@ -95,7 +95,7 @@ export default function SignUp() {
               <Label value="Your password" />
               <TextInput
                 type="password"
-                placeholder="Password"
+                placeholder="********"
                 id="password"
                 onChange={handleChange}
               />
