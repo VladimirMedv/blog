@@ -54,7 +54,6 @@ export default function SignIn() {
     } catch (error) {
       dispatch(signInFailure(error.message));
     }
-    console.log(formData);
   };
 
   return (
