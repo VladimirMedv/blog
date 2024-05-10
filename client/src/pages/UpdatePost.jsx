@@ -1,6 +1,5 @@
 import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
-
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import {
@@ -19,7 +18,13 @@ export default function UpdatePost() {
   const [file, setFile] = useState(null);
   const [imageUploadProgress, setImageUploadProgress] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    _id: "",
+    title: "",
+    category: "uncatigorized",
+    content: "",
+    image: "",
+  });
   const [publishError, setPublishError] = useState(null);
   const { postId } = useParams();
 
@@ -27,8 +32,8 @@ export default function UpdatePost() {
   const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    try {
-      const fetchPost = async () => {
+    const fetchPost = async () => {
+      try {
         const res = await fetch(`/api/post/getposts?postId=${postId}`);
         const data = await res.json();
         if (!res.ok) {
@@ -36,19 +41,28 @@ export default function UpdatePost() {
           setPublishError(data.message);
           return;
         }
-        if (res.ok) {
-          setPublishError(null);
-          setFormData(data.posts[0]);
+        const post = data.posts[0];
+        if (!post) {
+          throw new Error("Post not found");
         }
-      };
-
-      fetchPost();
-    } catch (error) {
-      console.log(error.message);
-    }
+        setFormData({
+          _id: post._id,
+          title: post.title,
+          category: post.category,
+          content: post.content,
+          image: post.image,
+        });
+        console.log("Form data set:", post);
+      } catch (error) {
+        console.log("Error fetching post:", error.message);
+        setPublishError("Failed to fetch post data.");
+      }
+    };
+    fetchPost();
   }, [postId]);
 
   const handleUploadImage = async () => {
+    console.log("File to upload:", file);
     try {
       if (!file) {
         setImageUploadError("Please select an image to upload");
@@ -67,6 +81,7 @@ export default function UpdatePost() {
           setImageUploadProgress(progress.toFixed(0));
         },
         (error) => {
+          console.log("Error uploading image:", error.message);
           setImageUploadError("Image upload failed");
           setImageUploadProgress(null);
         },
@@ -74,18 +89,27 @@ export default function UpdatePost() {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             setImageUploadProgress(null);
             setImageUploadError(null);
-            setFormData({ ...formData, image: downloadURL });
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              image: downloadURL,
+            }));
           });
         }
       );
     } catch (error) {
+      console.log("Error uploading image:", error.message);
       setImageUploadError("Image upload failed");
       setImageUploadProgress(null);
-      console.log(error);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submitting form data:", formData);
+    if (!formData._id) {
+      setPublishError("Post ID is missing.");
+      return;
+    }
     try {
       const res = await fetch(
         `/api/post/updatepost/${formData._id}/${currentUser._id}`,
@@ -102,14 +126,13 @@ export default function UpdatePost() {
         setPublishError(data.message);
         return;
       }
-      if (res.ok) {
-        setPublishError(null);
-        navigate(`/post/${data.slug}`);
-      }
+      navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError("Something went wrong");
+      console.log("Error updating post:", error.message);
+      setPublishError("Failed to update post.");
     }
   };
+
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Update Post</h1>
@@ -122,13 +145,19 @@ export default function UpdatePost() {
             required
             className="flex-1"
             onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
+              setFormData((prevFormData) => ({
+                ...prevFormData,
+                title: e.target.value,
+              }))
             }
             value={formData.title}
           />
           <Select
             onChange={(e) =>
-              setFormData({ ...formData, category: e.target.value })
+              setFormData((prevFormData) => ({
+                ...prevFormData,
+                category: e.target.value,
+              }))
             }
             value={formData.category}
           >
@@ -151,7 +180,7 @@ export default function UpdatePost() {
             size="sm"
             outline
             onClick={handleUploadImage}
-            disabled={imageUploadProgress}
+            disabled={imageUploadProgress !== null}
           >
             {imageUploadProgress ? (
               <div className="w-16 h-16">
@@ -179,7 +208,12 @@ export default function UpdatePost() {
           className="h-72 mb-12"
           placeholder="Write something..."
           required
-          onChange={(value) => setFormData({ ...formData, content: value })}
+          onChange={(value) =>
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              content: value,
+            }))
+          }
         />
         <Button type="submit" gradientDuoTone="purpleToPink">
           Update Post
