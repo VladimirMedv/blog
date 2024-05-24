@@ -38,7 +38,6 @@ export default function PostPage() {
 
   useEffect(() => {
     if (post && post.content) {
-      // Вызываем подсветку кода для всех блоков кода
       document.querySelectorAll("pre code").forEach((block) => {
         hljs.highlightElement(block);
       });
