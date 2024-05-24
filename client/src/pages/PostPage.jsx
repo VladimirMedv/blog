@@ -2,6 +2,9 @@ import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CallToAction from "../components/CallToAction";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 export default function PostPage() {
   const { postSlug } = useParams();
@@ -33,12 +36,56 @@ export default function PostPage() {
     fetchPost();
   }, [postSlug]);
 
+  useEffect(() => {
+    if (post && post.content) {
+      // Вызываем подсветку кода для всех блоков кода
+      document.querySelectorAll("pre code").forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    }
+  }, [post]);
+
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Spinner size="xl" />
       </div>
     );
+
+  const renderContentWithCopyButtons = (content) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+    const elements = Array.from(doc.body.childNodes);
+
+    return elements.map((element, index) => {
+      if (element.nodeName.toLowerCase() === "pre") {
+        const codeContent = element.innerHTML;
+        return (
+          <div key={index} className="relative bg-black p-1 rounded  mt-3 mb-3">
+            <pre className="overflow-auto">
+              <code
+                dangerouslySetInnerHTML={{ __html: codeContent }}
+                className="text-white"
+              />
+            </pre>
+            <CopyToClipboard text={element.textContent}>
+              <button className="absolute top-2 right-2 bg-gray-500 text-white px-1 py-1 text-sm hover:bg-gray-700 transition">
+                Copy code
+              </button>
+            </CopyToClipboard>
+          </div>
+        );
+      } else {
+        return (
+          <div
+            key={index}
+            dangerouslySetInnerHTML={{ __html: element.outerHTML }}
+          />
+        );
+      }
+    });
+  };
+
   return (
     <main className="p-3 flex flex-col max-w-6xl mx-auto min-h-screen">
       <h1 className="text-3xl font-serif mt-10 p-3 text-center max-w-2xl mx-auto lg:text-4xl">
@@ -59,15 +106,13 @@ export default function PostPage() {
       />
       <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
         <span>{post && new Date(post.createdAt).toLocaleDateString()}</span>
-
         <span className="italic">
           {post && (post.content.length / 1000).toFixed(0)} mins read
         </span>
       </div>
-      <div
-        className="p-3 max-w-2xl mx-auto w-full post-content"
-        dangerouslySetInnerHTML={{ __html: post && post.content }}
-      ></div>
+      <div className="p-3 max-w-2xl mx-auto w-full post-content">
+        {post && renderContentWithCopyButtons(post.content)}
+      </div>
       <div className="max-w-4xl mx-auto w-full">
         <CallToAction />
       </div>

@@ -1,7 +1,7 @@
 import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+
+import QuillEditor from "../components/QuillEditor.jsx";
 import {
   getDownloadURL,
   getStorage,
@@ -202,8 +202,7 @@ export default function UpdatePost() {
             className="w-full h-72 object-cover"
           />
         )}
-        <ReactQuill
-          theme="snow"
+        <QuillEditor
           value={formData.content}
           className="h-72 mb-12"
           placeholder="Write something..."
