@@ -14,8 +14,6 @@ const CustomToolbar = () => (
     <button className="ql-italic" />
     <button className="ql-underline" />
     <button className="ql-link" />
-    <button className="ql-list" value="ordered" />
-    <button className="ql-list" value="bullet" />
     <button className="ql-script" value="sub" />
     <button className="ql-script" value="super" />
     <button className="ql-code-block" />
@@ -23,46 +21,7 @@ const CustomToolbar = () => (
 );
 
 const QuillEditor = ({ value, onChange }) => {
-  const [quillModules, setQuillModules] = useState({
-    toolbar: "#toolbar",
-  });
-
-  useEffect(() => {
-    let isMounted = true; // Flag to track if the component is still mounted
-
-    if (typeof window !== "undefined") {
-      import("quill").then((Quill) => {
-        const BlockEmbed = Quill.import("blots/block/embed");
-
-        class Syntax extends BlockEmbed {
-          static create(value) {
-            let node = super.create();
-            node.innerHTML = value;
-            return node;
-          }
-          static value(node) {
-            return node.innerHTML;
-          }
-        }
-
-        Syntax.blotName = "syntax";
-        Syntax.tagName = "pre";
-        Syntax.className = "ql-syntax";
-        Quill.register(Syntax, true);
-
-        if (isMounted) {
-          setQuillModules({
-            toolbar: "#toolbar",
-            syntax: true,
-          });
-        }
-      });
-    }
-
-    return () => {
-      isMounted = false; // Cleanup flag
-    };
-  }, []);
+  const [quillModules, setQuillModules] = useState({ toolbar: "#toolbar" });
 
   return (
     <div className="text-editor">

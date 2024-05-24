@@ -52,7 +52,6 @@ export default function UpdatePost() {
           content: post.content,
           image: post.image,
         });
-        console.log("Form data set:", post);
       } catch (error) {
         console.log("Error fetching post:", error.message);
         setPublishError("Failed to fetch post data.");
@@ -205,7 +204,6 @@ export default function UpdatePost() {
         <QuillEditor
           value={formData.content}
           className="h-72 mb-12"
-          placeholder="Write something..."
           required
           onChange={(value) =>
             setFormData((prevFormData) => ({

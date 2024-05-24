@@ -145,7 +145,6 @@ export default function CreatePost() {
         <QuillEditor
           value={formData.content}
           className="h-72 mb-12"
-          placeholder="Write something..."
           required
           onChange={(value) =>
             setFormData((prevFormData) => ({
