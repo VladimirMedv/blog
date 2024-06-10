@@ -5,6 +5,7 @@ import CallToAction from "../components/CallToAction";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import CommentSection from "../components/CommentSection";
 
 export default function PostPage() {
   const { postSlug } = useParams();
@@ -115,6 +116,7 @@ export default function PostPage() {
       <div className="max-w-4xl mx-auto w-full">
         <CallToAction />
       </div>
+      <CommentSection postId={post && post._id} />
     </main>
   );
 }
