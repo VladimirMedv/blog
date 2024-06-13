@@ -1,7 +1,8 @@
 import { Alert, Button, Textarea } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Comment from "./Comment";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
@@ -11,7 +12,6 @@ export default function CommentSection({ postId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(postId);
     if (comment.length > 200) {
       return;
     }
@@ -38,6 +38,21 @@ export default function CommentSection({ postId }) {
       setCommentError(error.message);
     }
   };
+
+  useEffect(() => {
+    const getComments = async () => {
+      try {
+        const res = await fetch(`/api/comment/getPostComments/${postId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+    getComments();
+  }, [postId]);
 
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
@@ -91,6 +106,22 @@ export default function CommentSection({ postId }) {
             </Alert>
           )}
         </form>
+      )}
+
+      {comments.length === 0 ? (
+        <p className="text-gray-500 text-sm my-5">No comments yet.</p>
+      ) : (
+        <>
+          <div className="flex items-center gap-1 my-5 text-gray-500 text-sm">
+            <p>Comments</p>
+            <div className="border border-gray-400 rounded-sm py-1 px-2">
+              <p>{comments.length}</p>
+            </div>
+          </div>
+          {comments.map((comment) => (
+            <Comment key={comment._id} comment={comment} />
+          ))}
+        </>
       )}
     </div>
   );
